@@ -1,0 +1,318 @@
+#include <Servo.h>
+#include <SoftwareSerial.h>
+Servo myservo;  // create servo object to control a servo
+int pos = 0;    // variable to store the servo position
+
+
+const int trig = 6;  
+const int echo = 7;    
+int M1 = 8; 
+int M2 = 9;      
+int M3 = 10;        
+int M4 = 11;  
+
+void Select();
+
+SoftwareSerial BT (3,2);
+void Bluetooth();
+char ch;
+int Y=1;
+
+int ServoPin = 5;   
+
+int gioihan = 20;
+int i;
+int x = 0;
+unsigned long thoigian; 
+int khoangcach;          
+int khoangcachtrai, khoangcachphai;
+int maxspeed=30;
+
+void UltrasonicCheck();
+void Forward(int duongdi);
+void Rightturn();
+void Leftturn();
+void Reverse();
+void Stop();
+void quaycbsangphai();
+void quaycbsangtrai();
+
+
+void setup() {
+  BT.begin(9600);
+  Serial.begin(9600);
+  
+  // put your setup code here, to run once:
+  myservo.attach(ServoPin); 
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);   
+
+  pinMode(M1, OUTPUT);
+  pinMode(M3, OUTPUT);
+  pinMode(M2, OUTPUT);
+  pinMode(M4, OUTPUT);
+  digitalWrite(M1, LOW);
+  digitalWrite(M3, LOW);
+  digitalWrite(M2, LOW);
+  digitalWrite(M2, LOW);
+  myservo.write(45);
+  delay(500);
+
+
+
+}
+
+void loop()
+{
+  while(1){
+    delay(100);
+    
+  khoangcach = 0;
+  UltrasonicCheck();
+  ch = BT.read();
+
+ Select();
+
+ if (ch=='E' ) {  
+  digitalWrite(M1,LOW);
+  digitalWrite(M2,LOW);
+  digitalWrite(M3,LOW);
+  digitalWrite(M4,LOW);
+  } 
+
+ if (ch=='e' ) {  
+  digitalWrite(M1,LOW);
+  digitalWrite(M2,LOW);
+  digitalWrite(M3,LOW);
+  digitalWrite(M4,LOW);
+
+   } 
+
+   
+ if (ch=='B'  && Y==1 ) { 
+  digitalWrite(M1,HIGH);
+  digitalWrite(M2,LOW);
+  digitalWrite(M3,HIGH);
+  digitalWrite(M4,LOW);
+   }  
+
+ if (ch=='b'  && Y==1) { 
+  digitalWrite(M1,HIGH);
+  digitalWrite(M2,LOW);
+  digitalWrite(M3,HIGH);
+  digitalWrite(M4,LOW);
+   }  
+
+
+ if (ch=='H'  && Y==1) { 
+  digitalWrite(M2,HIGH);
+  digitalWrite(M1,LOW);
+  digitalWrite(M4,HIGH);
+  digitalWrite(M3,LOW);
+   } 
+
+ if (ch=='h'  && Y==1 ) { 
+  digitalWrite(M2,HIGH);
+  digitalWrite(M1,LOW);
+  digitalWrite(M4,HIGH);
+  digitalWrite(M3,LOW);
+   } 
+
+ if (ch=='D'  && Y==1 ) { 
+  digitalWrite(M1,HIGH);
+  digitalWrite(M2,LOW);
+  digitalWrite(M3,LOW);
+  digitalWrite(M4,HIGH);
+   } 
+ if (ch=='d'  && Y==1 ) { 
+  digitalWrite(M1,HIGH);
+  digitalWrite(M2,LOW);
+  digitalWrite(M3,LOW);
+  digitalWrite(M4,HIGH);
+   } 
+
+ if (ch=='F'  && Y==1) { 
+  digitalWrite(M1,LOW);
+  digitalWrite(M2,HIGH);
+  digitalWrite(M4,LOW);
+  digitalWrite(M3,HIGH);
+   } 
+
+ if (ch=='f'  && Y==1 ) { 
+  digitalWrite(M1,LOW);
+  digitalWrite(M2,HIGH);
+  digitalWrite(M4,LOW);
+  digitalWrite(M3,HIGH);
+   } 
+
+
+   
+
+
+if(Y==0)
+{
+ 
+  khoangcach = 0;
+  UltrasonicCheck();
+  UltrasonicCheck();
+  UltrasonicCheck();
+  if (khoangcach > gioihan || khoangcach == 0)
+  {
+      Forward();
+      Select();
+  }
+  else
+  {
+    Stop();
+    quaycbsangtrai();
+    UltrasonicCheck();
+    UltrasonicCheck();
+    khoangcachtrai = khoangcach;
+    quaycbsangphai();
+    UltrasonicCheck();
+    UltrasonicCheck();
+    khoangcachphai = khoangcach;
+    if (khoangcachphai < gioihan && khoangcachtrai < gioihan) {
+      Reverse();
+    }
+    else
+    {
+      if (khoangcachphai >= khoangcachtrai)
+      {        
+        Leftturn();
+        delay(500);
+      }
+      if (khoangcachphai <= khoangcachtrai)
+      {
+        Rightturn();
+        delay(500);
+      }
+    }
+  }
+   
+    
+    Select();
+}
+
+
+
+
+
+
+
+
+  
+
+}
+}
+void Select()
+{
+  if (ch=='A') {
+  Y=1;
+  Stop();
+  Serial.print ("BT");
+   } 
+   
+  if (ch=='a' ){
+  Y=0;
+  Stop();
+  Serial.print ("US");
+   }
+
+  
+   } 
+
+
+void Bluetooth()
+{
+
+}
+void Forward()
+{
+
+  digitalWrite(M1, HIGH);
+  digitalWrite(M3, HIGH);
+
+  ch = BT.read();
+
+}
+
+void Leftturn()
+{
+  Stop();
+  digitalWrite(M2, HIGH);
+
+  delay(1200);
+  digitalWrite(M2, LOW);
+
+
+
+}
+void Rightturn()
+{
+  Stop();
+  digitalWrite(M4, HIGH);
+
+  delay(1200);
+  digitalWrite(M4, LOW);
+
+
+}
+
+void Reverse()
+{
+  Stop();
+  for (i = 0; i < 20; i++)
+  digitalWrite(M2, HIGH);
+  digitalWrite(M4, HIGH);
+  delay(1000);
+
+
+  digitalWrite(M2, LOW);
+  digitalWrite(M4, LOW);
+}
+
+void Stop()
+{
+  digitalWrite(M1, LOW);
+  digitalWrite(M3, LOW);
+  digitalWrite(M2, LOW);
+  digitalWrite(M4, LOW);
+}
+
+void UltrasonicCheck()
+{
+
+  digitalWrite(trig, LOW); 
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);  
+  delayMicroseconds(10); 
+  digitalWrite(trig, LOW); 
+
+
+  // ?o ?? r?ng xung HIGH ? chân echo.
+  thoigian = pulseIn(echo, HIGH);
+
+  khoangcach = thoigian / 2 / 29.412;
+
+}
+
+
+void quaycbsangtrai()
+{
+  myservo.write(180);              // tell servo to go to position in variable 'pos'
+  delay(1250);
+  UltrasonicCheck();
+  myservo.write(90);              // tell servo to go to position in variable 'pos'
+}
+void quaycbsangphai()
+{
+  myservo.write(0);              // tell servo to go to position in variable 'pos'
+  delay(1250);
+  UltrasonicCheck();
+  myservo.write(90);              // tell servo to go to position in variable 'pos'
+}
+void resetservo()
+{
+  myservo.write(90);
+}
